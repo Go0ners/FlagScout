@@ -21,7 +21,6 @@ assemble() {
   local out="dist/$nav"
   rm -rf "$out"
   mkdir -p "$out"
-  # 1) cœur commun, 2) surcouche spécifique au navigateur (manifest, background…)
   cp -R shared/. "$out"/
   cp -R "platform/$nav/." "$out"/
   find "$out" -name '.DS_Store' -delete

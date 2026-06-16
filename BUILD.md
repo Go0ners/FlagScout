@@ -1,86 +1,72 @@
-# Construire FlagScout (Firefox & Chrome)
+# Building FlagScout (Firefox & Chrome)
 
-FlagScout partage un **cœur commun** (`shared/`) et une **couche par navigateur**
-(`platform/<nav>/`). Le script `build.sh` assemble les deux dans `dist/<nav>/`
-et produit un `.zip` par navigateur.
+FlagScout shares a **common core** (`shared/`) and a **per-browser layer**
+(`platform/<browser>/`). The `build.sh` script assembles both into `dist/<browser>/`
+and produces one `.zip` per browser.
 
 ```
-shared/                 # commun : popup, options, _locales, icons, vendor, background/ (core.js + doh.js)
-platform/firefox/       # manifest + background.js (DNS natif + Referer via webRequest)
+shared/                 # common: popup, options, _locales, icons, vendor, background/ (core.js + doh.js)
+platform/firefox/       # manifest + background.js (native DNS + Referer via webRequest)
 platform/chrome/        # manifest + background.js (DNS via DoH) + rules.json (Referer via DNR)
-preview/                # aperçu de dev (hors extension, non empaqueté)
-build.sh                # assemble dist/firefox/ et dist/chrome/
+preview/                # dev preview (outside the extension, not packaged)
+build.sh                # assembles dist/firefox/ and dist/chrome/
 ```
 
 ---
 
-## Méthode recommandée : `./build.sh`
+## Recommended method: `./build.sh`
 
-Prérequis : `bash` et `zip` (présents sur macOS/Linux). **Aucune dépendance Node** requise.
+Prerequisites: `bash` and `zip` (present on macOS/Linux). **No Node dependency** required.
 
 ```bash
-./build.sh             # construit firefox ET chrome
-./build.sh firefox     # un seul navigateur
+./build.sh             # builds firefox AND chrome
+./build.sh firefox     # a single browser
 ./build.sh chrome
 ```
 
-Résultat :
+Result:
 
 - `dist/firefox/` + `dist/flagscout-firefox.zip`
 - `dist/chrome/`  + `dist/flagscout-chrome.zip`
 
-Le dossier `dist/<nav>/` est **chargeable tel quel** (non empaqueté) ; le `.zip`
-sert à la publication. `manifest.json` est à la **racine** de chaque dossier/zip.
+The `dist/<browser>/` folder is **loadable as is** (unpackaged); the `.zip`
+is used for publishing. `manifest.json` is at the **root** of each folder/zip.
 
-> ℹ️ Tout fichier ajouté dans `shared/` est inclus dans les deux navigateurs.
-> Un fichier propre à un navigateur va dans `platform/<nav>/` (il écrase/complète
-> le commun lors de l'assemblage).
-
----
-
-## Charger en développement
-
-- **Firefox** : `about:debugging#/runtime/this-firefox` → « Charger un module
-  complémentaire temporaire… » → `dist/firefox/manifest.json`.
-- **Chrome / Edge / Brave** : `chrome://extensions` → activer le **Mode
-  développeur** → « Charger l'extension non empaquetée » → dossier `dist/chrome/`.
+> ℹ️ Any file added to `shared/` is included in both browsers.
+> A browser-specific file goes into `platform/<browser>/` (it overrides/completes
+> the common part during assembly).
 
 ---
 
-## Différences par navigateur (gérées automatiquement)
+## Load in development
 
-| Sujet | Firefox | Chrome (MV3) |
+- **Firefox**: `about:debugging#/runtime/this-firefox` → "Load Temporary
+  Add-on…" → `dist/firefox/manifest.json`.
+- **Chrome / Edge / Brave**: `chrome://extensions` → enable **Developer
+  mode** → "Load unpacked" → `dist/chrome/` folder.
+
+---
+
+## Per-browser differences (handled automatically)
+
+| Topic | Firefox | Chrome (MV3) |
 |---|---|---|
 | Background | event page `scripts` (module) | `service_worker` (module) |
-| API `browser.*` | natif | alias `browser.* → chrome.*` (`vendor/browser-polyfill.js`) |
-| Résolution DNS | `browser.dns.resolve` | DNS-over-HTTPS (Cloudflare) |
-| Referer tuiles OSM | `webRequest` bloquant | `declarativeNetRequest` (`rules.json`) |
-| Réglages spécifiques | `browser_specific_settings`, `webRequestBlocking` | `declarativeNetRequest`, `minimum_chrome_version` |
+| `browser.*` API | native | alias `browser.* → chrome.*` (`vendor/browser-polyfill.js`) |
+| DNS resolution | `browser.dns.resolve` | DNS-over-HTTPS (Cloudflare) |
+| OSM tile Referer | blocking `webRequest` | `declarativeNetRequest` (`rules.json`) |
+| Specific settings | `browser_specific_settings`, `webRequestBlocking` | `declarativeNetRequest`, `minimum_chrome_version` |
 
-Le code du popup, des options, des locales, des icônes et toute la logique du
-background sont **identiques** sur les deux navigateurs.
-
----
-
-## Publication
-
-- **Firefox / AMO** : téléverser `dist/flagscout-firefox.zip` sur
-  [addons.mozilla.org](https://addons.mozilla.org/developers/) (AMO signe le paquet).
-- **Chrome Web Store** : téléverser `dist/flagscout-chrome.zip` sur le
-  [Developer Dashboard](https://chrome.google.com/webstore/devconsole/).
-
-### Lint Firefox (optionnel)
-```bash
-npx --yes web-ext lint --source-dir dist/firefox
-```
-⚠️ Sur **Node.js 24**, `web-ext` peut planter — utiliser **Node 18/20**. Non bloquant :
-les magasins refont leur propre validation à la soumission.
+The popup, options, locales, icons code and all the background logic
+are **identical** across both browsers.
 
 ---
 
-## Changement de version
+## Changing the version
 
-1. Mettre à jour `"version"` dans **les deux** manifests
-   (`platform/firefox/manifest.json` et `platform/chrome/manifest.json`).
-2. Relancer `./build.sh`.
-3. Téléverser les nouveaux zips. Les magasins refusent un numéro déjà publié.
+1. Update `"version"` in **both** manifests
+   (`platform/firefox/manifest.json` and `platform/chrome/manifest.json`).
+2. Re-run `./build.sh`.
+
+### Contact
+Questions: **flagscout@gnrs.ca**

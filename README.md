@@ -106,3 +106,6 @@ Each field has a **Test** button (validates the key live → green/red) and an *
 - No system notifications — everything goes through the icon and the popup.
 - Native JavaScript, no bundler or transpilation; a simple assembly (`build.sh`) combines `shared/` + `platform/<browser>/`.
 - UI localized in FR / EN (`browser.i18n`).
+
+### Contact
+Questions: **flagscout@gnrs.ca**
