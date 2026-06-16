@@ -90,5 +90,11 @@
   "optAboutTagline":     { "message": "Le pays, l'IP, la géolocalisation, le WHOIS et la réputation de chaque site." },
   "optContact":          { "message": "Contact" },
   "optCreditsTitle":     { "message": "Sources de données" },
-  "optMadeBy":           { "message": "Fait avec ❤️ sans pistage ni publicité" }
+  "optMadeBy":           { "message": "Fait avec ❤️ sans pistage ni publicité" },
+  "optUpdChecking":      { "message": "Vérification des mises à jour…" },
+  "optUpdLatest":        { "message": "À jour" },
+  "optUpdAvailable":     { "message": "Mise à jour disponible" },
+  "optUpdError":         { "message": "Vérification impossible" },
+  "optUpdGet":           { "message": "Mettre à jour" },
+  "optUpdRecheck":       { "message": "Revérifier" }
 }

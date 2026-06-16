@@ -99,6 +99,45 @@ h1 {
 .about-ver { font-size: 12px; font-weight: 500; color: var(--text-dim); }
 .about-tagline { font-size: 12.5px; margin-top: 1px; }
 
+/* État de mise à jour (vérificateur de version) */
+.about-update {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+  font-size: 12px;
+  font-weight: 650;
+}
+.about-update.is-pending { color: var(--text-dim); }
+.about-update.is-latest { color: var(--ok); }
+.about-update.is-error { color: var(--text-dim); }
+.about-update.is-available { color: #d97706; }
+.about-update.is-latest #about-update-text::before { content: "✓ "; }
+.about-update.is-available #about-update-text::before { content: "⬆ "; }
+.about-update-link {
+  font-weight: 650;
+  text-decoration: none;
+  padding: 2px 9px;
+  border-radius: 6px;
+  background: #d97706;
+  color: #fff;
+}
+.about-update-link:hover { filter: brightness(1.05); }
+.about-update-recheck {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-decoration: underline;
+  cursor: pointer;
+}
+@media (prefers-color-scheme: dark) {
+  .about-update.is-available { color: #fbbf24; }
+}
+
 .about-credits-title {
   font-size: 10.5px;
   font-weight: 700;

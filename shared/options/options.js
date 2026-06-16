@@ -192,14 +192,80 @@ function fillAbout() {
   $("about-year").textContent = String(new Date().getFullYear());
 }
 
+// ─── Vérificateur de version ────────────────────────────
+// Interroge l'API publique d'AMO pour connaître la dernière version publiée
+// et la compare à la version installée. AMO est le seul store de publication.
+const AMO_API = "https://addons.mozilla.org/api/v5/addons/addon/flagscout@gnrs.ca/";
+const UPDATE_TIMEOUT_MS = 9000;
+
+// Compare deux versions « a.b.c » numériquement.
+// Renvoie 1 si v1 > v2, -1 si v1 < v2, 0 si égales.
+function compareVersions(v1, v2) {
+  const a = String(v1).split(".").map((n) => parseInt(n, 10) || 0);
+  const b = String(v2).split(".").map((n) => parseInt(n, 10) || 0);
+  const len = Math.max(a.length, b.length);
+  for (let i = 0; i < len; i++) {
+    const x = a[i] || 0, y = b[i] || 0;
+    if (x > y) return 1;
+    if (x < y) return -1;
+  }
+  return 0;
+}
+
+// Met à jour l'affichage de l'état de mise à jour.
+function setUpdateState(kind, text, { showLink = false, showRecheck = false } = {}) {
+  const box = $("about-update");
+  const txt = $("about-update-text");
+  const link = $("about-update-link");
+  const recheck = $("about-update-recheck");
+  box.hidden = false;
+  box.className = "about-update" + (kind ? " is-" + kind : "");
+  txt.textContent = text || "";
+  link.hidden = !showLink;
+  recheck.hidden = !showRecheck;
+}
+
+// Récupère la dernière version sur AMO et compare à la version installée.
+async function checkForUpdate() {
+  const recheck = $("about-update-recheck");
+  recheck.textContent = t("optUpdRecheck");
+
+  let current = "";
+  try { current = browser.runtime.getManifest().version; } catch {}
+
+  setUpdateState("pending", t("optUpdChecking"));
+
+  try {
+    const res = await fetch(AMO_API, {
+      headers: { "Accept": "application/json" },
+      signal: AbortSignal.timeout(UPDATE_TIMEOUT_MS),
+    });
+    if (!res.ok) throw new Error("http " + res.status);
+    const data = await res.json();
+    const latest = data && data.current_version && data.current_version.version;
+    if (!latest) throw new Error("no version");
+
+    if (compareVersions(latest, current) > 0) {
+      setUpdateState("available", `${t("optUpdAvailable")} v${latest}`, { showLink: true });
+    } else {
+      setUpdateState("latest", t("optUpdLatest"), { showRecheck: true });
+    }
+  } catch {
+    setUpdateState("error", t("optUpdError"), { showRecheck: true });
+  }
+}
+
 // Initialisation : i18n, à-propos, champs, chargement des clés, listeners.
 document.addEventListener("DOMContentLoaded", () => {
   applyI18n();
   fillAbout();
+  checkForUpdate();
   setupReveal();
   load();
   $("keys-form").addEventListener("submit", save);
   for (const btn of document.querySelectorAll(".btn-test")) {
     btn.addEventListener("click", onTest);
   }
+  $("about-update-link").textContent = t("optUpdGet");
+  $("about-update-recheck").addEventListener("click", checkForUpdate);
 });
