@@ -21,6 +21,9 @@
 
 Shows, in the **toolbar**, the hosting country flag of the visited site. On click: a panel with the site's IP, its geolocation, the ISP, your public IP, a **domain search** field, and quick access to a **map**, **VirusTotal**, **WHOIS** and the **DNS records** of the domain.
 
+![alt text](docs/screen_black.png)
+![alt text](docs/screen_white.png)
+
 ---
 
 > ### 🦊 Install from the official Firefox portal
