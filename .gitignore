@@ -1,0 +1,19 @@
+# Build artifacts
+dist/
+web-ext-artifacts/
+*.zip
+
+# Dependencies
+node_modules/
+preview/
+
+# IDE / outils
+.idea/
+.vscode/
+.claude/
+.kiro/
+
+# OS / Synology
+.DS_Store
+@eaDir/
+*.tmp

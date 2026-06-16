@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "FlagScout",
+  "version": "1.1.1",
+  "description": "__MSG_extDescription__",
+  "default_locale": "fr",
+  "minimum_chrome_version": "110",
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "icons": {
+    "48": "icons/icon-48.png",
+    "96": "icons/icon-96.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "FlagScout",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png"
+    }
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "permissions": [
+    "tabs",
+    "webRequest",
+    "storage",
+    "declarativeNetRequest"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "osm_tiles",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  }
+}

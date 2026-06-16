@@ -1,0 +1,545 @@
+/* ════════════════════════════════════════════════════════
+   FlagScout — popup
+   ════════════════════════════════════════════════════════ */
+
+:root {
+  color-scheme: light dark;
+  --text:      #1a1d21;
+  --text-dim:  #6b7280;
+  --bg:        #ffffff;
+  --surface:   #f6f7f9;
+  --border:    #e6e8eb;
+  --hairline:  #eceef1;
+  --accent:    #2563eb;
+  --accent-fg: #ffffff;
+  --error:     #dc2626;
+  --warn:      #d97706;
+  --ok:        #16a34a;
+  --radius:    9px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text:      #f2f3f5;
+    --text-dim:  #9aa0a8;
+    --bg:        #1c1f23;
+    --surface:   #26292e;
+    --border:    #34383e;
+    --hairline:  #2e3136;
+    --accent:    #5b9bff;
+    --accent-fg: #0e1116;
+    --error:     #f87171;
+    --warn:      #fbbf24;
+    --ok:        #4ade80;
+  }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text);
+  background: var(--bg);
+  width: 312px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.hidden { display: none !important; }
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace;
+  font-size: 12px;
+}
+
+/* ─── Vue principale ──────────────────────────────────── */
+
+#main-view {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+}
+
+/* En-tête site : drapeau + pays + ville */
+.site-head {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+.head-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.site-flag {
+  font-size: 32px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.site-head-text { min-width: 0; }
+
+.site-country {
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  /* Jusqu'à 2 lignes (messages longs « Géolocalisation indisponible »,
+     noms de pays longs…), coupure seulement au-delà. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.site-loc {
+  font-size: 12px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.site-loc:empty { display: none; }
+
+/* ─── Panneau (surface groupée) ───────────────────────── */
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* Ligne label + valeur */
+.row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 9px 13px;
+}
+/* `display:flex` bat le [hidden] du navigateur → on le rétablit explicitement */
+.row[hidden] { display: none; }
+.row + .row { border-top: 1px solid var(--hairline); }
+
+.row-label {
+  flex-shrink: 0;
+  width: 64px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+}
+
+.row-value {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ligne de tags */
+.row-tags {
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: flex-end;
+}
+.row-tags:empty { display: none; }
+
+.tag {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 2px 8px;
+  border-radius: 5px;
+  background: var(--bg);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+}
+
+/* ─── Boutons ─────────────────────────────────────────── */
+
+.btn {
+  font-family: inherit;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .12s, color .12s, opacity .12s, border-color .12s;
+}
+
+/* Rangée d'actions en icônes (les boutons masqués ne laissent pas de trou) */
+.actions {
+  display: flex;
+  gap: 7px;
+}
+.actions .btn-action { flex: 1; min-width: 0; }
+.actions .btn-action[hidden] { display: none; }
+.btn-action .ic { width: 18px; height: 18px; }
+
+.btn-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 8px;
+  font-size: 12px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.btn-action .btn-ico { font-size: 14px; line-height: 1; }
+.btn-action:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.btn-action:active:not(:disabled) { filter: brightness(0.97); }
+.btn-action:disabled { opacity: .4; cursor: default; }
+
+.btn-ghost {
+  padding: 5px 11px;
+  font-size: 12px;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+.btn-ghost:hover { background: var(--surface); }
+
+/* Bouton icône (ouvrir dans un onglet, dans les en-têtes de vue) */
+.btn-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid var(--border);
+}
+.btn-icon:hover { color: var(--accent); border-color: var(--accent); background: var(--surface); }
+.btn-icon.copied { color: var(--ok); border-color: var(--ok); }
+/* `display:inline-flex` bat le [hidden] du navigateur → on le rétablit */
+.btn-icon[hidden] { display: none; }
+
+/* ─── Recherche manuelle de domaine (vue racine) ──────── */
+
+.domain-search {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.domain-search-input {
+  flex: 1;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace;
+  font-size: 12.5px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+}
+.domain-search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--bg);
+}
+.domain-search-input::placeholder { color: var(--text-dim); }
+
+/* État d'erreur de validation (message affiché dans le placeholder) */
+.domain-search-input.input-error { border-color: var(--error); }
+.domain-search-input.input-error::placeholder { color: var(--error); opacity: 1; }
+
+/* Loupe verte (rechercher) */
+.btn-search {
+  color: var(--ok);
+  border-color: color-mix(in srgb, var(--ok) 45%, var(--border));
+}
+.btn-search:hover {
+  color: var(--ok);
+  border-color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 12%, transparent);
+}
+
+/* Croix rouge (réinitialiser au domaine de l'onglet) */
+.btn-reset {
+  color: var(--error);
+  border-color: color-mix(in srgb, var(--error) 45%, var(--border));
+}
+.btn-reset:hover {
+  color: var(--error);
+  border-color: var(--error);
+  background: color-mix(in srgb, var(--error) 12%, transparent);
+}
+
+/* Icône SVG (référencée via <use> depuis le sprite) */
+.ic {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Rangée cliquable → copie dans le presse-papier */
+.row-copyable { cursor: pointer; }
+.row-copyable:hover { background: color-mix(in srgb, var(--accent) 9%, transparent); }
+.row-copyable:active { background: color-mix(in srgb, var(--accent) 15%, transparent); }
+.row-copyable.copied .row-value { color: var(--accent); font-weight: 600; }
+
+/* ─── Hints / erreurs ─────────────────────────────────── */
+
+.hint {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.hint-error { color: var(--error); }
+.hint:empty { display: none; }
+
+/* ─── Vue WHOIS ───────────────────────────────────────── */
+
+.whois-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Retour à gauche · titre centré · « ouvrir » à droite */
+.view-titlewrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.view-title {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Domaine actuellement analysé, sous le titre de la vue */
+.view-domain {
+  max-width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.view-domain:empty { display: none; }
+
+.whois-body {
+  overflow-y: auto;
+  /* Hauteur = contenu, plafonnée pour rester sous la limite de popup Firefox
+     (~600 px) : au-delà, seul le corps défile, l'en-tête reste fixe. */
+  max-height: 520px;
+  padding: 14px;
+}
+
+/* Message centré (chargement / erreur / vide) */
+.whois-status {
+  padding: 32px 18px;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.whois-status.is-error { color: var(--error); }
+
+.whois-spinner {
+  width: 22px;
+  height: 22px;
+  margin: 0 auto 12px;
+  border: 2.5px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .whois-spinner { animation-duration: 2s; } }
+
+/* Une seule surface contenant toutes les sections */
+.whois-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.whois-section { padding: 10px 13px; }
+.whois-section + .whois-section { border-top: 1px solid var(--hairline); }
+
+.whois-section-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  margin-bottom: 7px;
+}
+
+/* Ligne label + valeur (dates) */
+.whois-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.whois-row + .whois-row { margin-top: 5px; }
+
+.whois-row-label {
+  flex-shrink: 0;
+  width: 76px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.whois-row-value {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 550;
+  word-break: break-word;
+}
+
+/* Valeur simple (registrar, titulaire) */
+.whois-text {
+  font-size: 12.5px;
+  word-break: break-word;
+}
+.whois-text + .whois-text { margin-top: 4px; }
+
+/* Élément de liste (nameservers, statuts) */
+.whois-item {
+  font-size: 12px;
+  word-break: break-all;
+}
+.whois-item + .whois-item { margin-top: 5px; }
+
+/* Chip d'alerte « domaine récent » (signal anti-phishing) */
+.whois-newchip {
+  display: inline-block;
+  margin-top: 7px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 5px;
+  color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 15%, transparent);
+}
+
+/* Valeur de date avec âge en second */
+.whois-age { color: var(--text-dim); font-weight: 500; }
+
+/* ─── Vue carte ───────────────────────────────────────── */
+
+/* Canevas de tuiles statiques */
+.map-frame-wrap {
+  position: relative;
+  height: 240px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.map-tile {
+  position: absolute;
+  width: 256px;
+  height: 256px;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Marqueur centré : pointe au centre exact */
+.map-pin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -100%);
+  line-height: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .35));
+}
+
+/* Commandes de zoom */
+.map-zoom {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.map-zoom button {
+  width: 26px;
+  height: 26px;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.map-zoom button:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Crédit discret (attribution obligatoire ODbL) */
+.map-attrib {
+  padding: 5px 14px 0;
+  font-size: 10px;
+  text-align: right;
+  color: var(--text-dim);
+}
+.map-attrib a { color: inherit; }
+.map-attrib a:hover { color: var(--accent); }
+
+/* ─── Vue VirusTotal ──────────────────────────────────── */
+
+.vt-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 18px;
+  margin-bottom: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.vt-score-num {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.vt-score-cap {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.vt-score.is-bad  .vt-score-num, .vt-score.is-bad  .vt-score-cap { color: var(--error); }
+.vt-score.is-warn .vt-score-num, .vt-score.is-warn .vt-score-cap { color: var(--warn); }
+.vt-score.is-good .vt-score-num, .vt-score.is-good .vt-score-cap { color: var(--ok); }
+
+.vt-stat-val.bad  { color: var(--error);    font-weight: 650; }
+.vt-stat-val.warn { color: var(--warn);     font-weight: 650; }
+.vt-stat-val.good { color: var(--ok);       font-weight: 600; }
+.vt-stat-val.dim  { color: var(--text-dim); }

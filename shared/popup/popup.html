@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="popup.css" />
+  <title>FlagScout</title>
+</head>
+<body>
+
+  <!-- Sprite d'icônes (défini une fois, référencé via <use>) -->
+  <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+    <symbol id="ic-back" viewBox="0 0 24 24">
+      <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+    </symbol>
+    <symbol id="ic-ext" viewBox="0 0 24 24">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+      <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+    </symbol>
+    <symbol id="ic-cog" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </symbol>
+    <symbol id="ic-copy" viewBox="0 0 24 24">
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+    </symbol>
+    <symbol id="ic-map" viewBox="0 0 24 24">
+      <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+      <line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>
+    </symbol>
+    <symbol id="ic-shield" viewBox="0 0 24 24">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </symbol>
+    <symbol id="ic-whois" viewBox="0 0 24 24">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>
+    </symbol>
+    <symbol id="ic-dns" viewBox="0 0 24 24">
+      <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+      <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+      <line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>
+    </symbol>
+    <symbol id="ic-search" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </symbol>
+    <symbol id="ic-x" viewBox="0 0 24 24">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </symbol>
+  </svg>
+
+  <!-- ═══ Vue principale ═══ -->
+  <div id="main-view">
+
+    <!-- En-tête : drapeau + pays + ville -->
+    <header class="site-head">
+      <span id="site-flag" class="site-flag">🌍</span>
+      <div class="site-head-text">
+        <div id="site-country" class="site-country">…</div>
+        <div id="site-loc" class="site-loc"></div>
+      </div>
+      <div class="head-actions">
+        <button id="copy-report-btn" class="btn btn-icon" data-i18n-title="btnCopyReport" hidden>
+          <svg class="ic"><use href="#ic-copy"/></svg>
+        </button>
+        <button id="settings-btn" class="btn btn-icon" data-i18n-title="btnSettings">
+          <svg class="ic"><use href="#ic-cog"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Recherche manuelle de domaine -->
+    <form id="domain-search-form" class="domain-search">
+      <input id="domain-search" type="text" class="domain-search-input"
+             data-i18n-placeholder="searchPlaceholder"
+             autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+      <button type="submit" id="domain-search-btn" class="btn btn-icon btn-search" data-i18n-title="btnSearch">
+        <svg class="ic"><use href="#ic-search"/></svg>
+      </button>
+      <button type="button" id="domain-reset" class="btn btn-icon btn-reset" data-i18n-title="btnResetDomain" hidden>
+        <svg class="ic"><use href="#ic-x"/></svg>
+      </button>
+    </form>
+
+    <!-- Détails du site -->
+    <div class="panel">
+      <div class="row" id="domain-row" hidden>
+        <span class="row-label" data-i18n="labelDomain"></span>
+        <span id="site-domain" class="row-value mono"></span>
+      </div>
+      <div class="row" id="ip-row">
+        <span id="ip-label" class="row-label" data-i18n="labelIp"></span>
+        <span id="site-ip" class="row-value mono"></span>
+      </div>
+      <div class="row" id="ip6-row" hidden>
+        <span class="row-label">IPv6</span>
+        <span id="site-ip6" class="row-value mono"></span>
+      </div>
+      <div class="row" id="rdns-row" hidden>
+        <span class="row-label" data-i18n="labelRdns"></span>
+        <span id="site-rdns" class="row-value mono"></span>
+      </div>
+      <div class="row" id="isp-row">
+        <span class="row-label" data-i18n="labelIsp"></span>
+        <span id="site-isp" class="row-value"></span>
+      </div>
+      <div id="site-tags" class="row row-tags"></div>
+    </div>
+
+    <!-- Actions (icônes, nom en tooltip au survol) -->
+    <div class="actions">
+      <button id="map-btn" class="btn btn-action" disabled data-i18n-title="btnMap"><svg class="ic"><use href="#ic-map"/></svg></button>
+      <button id="vt-btn" class="btn btn-action" disabled hidden data-i18n-title="btnVirusTotal"><svg class="ic"><use href="#ic-shield"/></svg></button>
+      <button id="whois-btn" class="btn btn-action" disabled data-i18n-title="btnWhois"><svg class="ic"><use href="#ic-whois"/></svg></button>
+      <button id="dns-btn" class="btn btn-action" disabled data-i18n-title="btnDns"><svg class="ic"><use href="#ic-dns"/></svg></button>
+    </div>
+
+    <!-- IP publique -->
+    <div class="panel">
+      <div class="row" id="user-ip-row">
+        <span class="row-label" data-i18n="sectionMyIp"></span>
+        <span id="user-ip" class="row-value mono"></span>
+      </div>
+    </div>
+    <div id="user-err" class="hint hint-error"></div>
+
+  </div>
+
+  <!-- ═══ Vue WHOIS ═══ -->
+  <div id="whois-view" class="hidden">
+    <header class="whois-head">
+      <button id="back-btn" class="btn btn-icon" data-back data-i18n-title="btnBack">
+        <svg class="ic"><use href="#ic-back"/></svg>
+      </button>
+      <div class="view-titlewrap">
+        <span class="view-title" data-i18n="btnWhois"></span>
+        <span class="view-domain" id="whois-domain"></span>
+      </div>
+      <button id="whois-open-btn" class="btn btn-icon" data-i18n-title="btnOpenTab">
+        <svg class="ic"><use href="#ic-ext"/></svg>
+      </button>
+    </header>
+    <div id="whois-body" class="whois-body"></div>
+  </div>
+
+  <!-- ═══ Vue carte ═══ -->
+  <div id="map-view" class="hidden">
+    <header class="whois-head">
+      <button id="map-back-btn" class="btn btn-icon" data-back data-i18n-title="btnBack">
+        <svg class="ic"><use href="#ic-back"/></svg>
+      </button>
+      <div class="view-titlewrap">
+        <span class="view-title" data-i18n="btnMap"></span>
+        <span class="view-domain" id="map-domain"></span>
+      </div>
+      <button id="map-open-btn" class="btn btn-icon" data-i18n-title="btnOpenTab">
+        <svg class="ic"><use href="#ic-ext"/></svg>
+      </button>
+    </header>
+    <div id="map-canvas" class="map-frame-wrap">
+      <div class="map-pin">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="#16a34a" stroke="#ffffff" stroke-width="1.5">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+          <circle cx="12" cy="9" r="2.5" fill="#ffffff" stroke="none"/>
+        </svg>
+      </div>
+      <div class="map-zoom">
+        <button type="button" id="map-zoom-in" aria-label="Zoom +">+</button>
+        <button type="button" id="map-zoom-out" aria-label="Zoom −">−</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Vue VirusTotal ═══ -->
+  <div id="vt-view" class="hidden">
+    <header class="whois-head">
+      <button id="vt-back-btn" class="btn btn-icon" data-back data-i18n-title="btnBack">
+        <svg class="ic"><use href="#ic-back"/></svg>
+      </button>
+      <div class="view-titlewrap">
+        <span class="view-title" data-i18n="btnVirusTotal"></span>
+        <span class="view-domain" id="vt-domain"></span>
+      </div>
+      <button id="vt-open-btn" class="btn btn-icon" data-i18n-title="btnOpenTab">
+        <svg class="ic"><use href="#ic-ext"/></svg>
+      </button>
+    </header>
+    <div id="vt-body" class="whois-body"></div>
+  </div>
+
+  <!-- ═══ Vue DNS ═══ -->
+  <div id="dns-view" class="hidden">
+    <header class="whois-head">
+      <button id="dns-back-btn" class="btn btn-icon" data-back data-i18n-title="btnBack">
+        <svg class="ic"><use href="#ic-back"/></svg>
+      </button>
+      <div class="view-titlewrap">
+        <span class="view-title" data-i18n="btnDns"></span>
+        <span class="view-domain" id="dns-domain"></span>
+      </div>
+      <button id="dns-open-btn" class="btn btn-icon" data-i18n-title="btnOpenTab">
+        <svg class="ic"><use href="#ic-ext"/></svg>
+      </button>
+    </header>
+    <div id="dns-body" class="whois-body"></div>
+  </div>
+
+  <script src="../vendor/browser-polyfill.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

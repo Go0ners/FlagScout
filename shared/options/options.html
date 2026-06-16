@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="options.css" />
+  <title data-i18n="optTitle"></title>
+</head>
+<body>
+
+  <!-- Sprite d'icônes (œil / œil barré) référencé via <use> -->
+  <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+    <symbol id="ic-eye" viewBox="0 0 24 24">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+    </symbol>
+    <symbol id="ic-eye-off" viewBox="0 0 24 24">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+      <line x1="1" y1="1" x2="23" y2="23"/>
+    </symbol>
+  </svg>
+
+  <main class="wrap">
+    <h1 data-i18n="optTitle"></h1>
+    <p class="intro" data-i18n="optIntro"></p>
+
+    <!-- Astuce : épingler à la barre d'outils -->
+    <aside class="tip">
+      <span class="tip-ico">📌</span>
+      <span data-i18n="optPinTip"></span>
+    </aside>
+
+    <form id="keys-form">
+
+      <!-- VirusTotal -->
+      <section class="field">
+        <div class="field-head">
+          <label for="vt-key" data-i18n="optVtLabel"></label>
+          <span class="badge badge-req" data-i18n="optRequired"></span>
+        </div>
+        <p class="field-desc" data-i18n="optVtDesc"></p>
+        <div class="field-input">
+          <input id="vt-key" type="password" autocomplete="off" spellcheck="false" />
+          <button type="button" class="btn-test"
+                  data-target="vt-key" data-service="virustotal" data-status="vt-status"
+                  data-i18n="optTest"></button>
+        </div>
+        <span id="vt-status" class="test-status"></span>
+        <a class="field-link" href="https://www.virustotal.com/gui/my-apikey"
+           target="_blank" rel="noreferrer" data-i18n="optApiKey"></a>
+      </section>
+
+      <!-- ipapi.is -->
+      <section class="field">
+        <div class="field-head">
+          <label for="ipapi-key" data-i18n="optIpapiLabel"></label>
+          <span class="badge badge-opt" data-i18n="optOptional"></span>
+        </div>
+        <p class="field-desc" data-i18n="optIpapiDesc"></p>
+        <div class="field-input">
+          <input id="ipapi-key" type="password" autocomplete="off" spellcheck="false" />
+          <button type="button" class="btn-test"
+                  data-target="ipapi-key" data-service="ipapi" data-status="ipapi-status"
+                  data-i18n="optTest"></button>
+        </div>
+        <span id="ipapi-status" class="test-status"></span>
+        <a class="field-link" href="https://ipapi.is/app/home"
+           target="_blank" rel="noreferrer" data-i18n="optApiKey"></a>
+      </section>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" data-i18n="optSave"></button>
+        <span id="saved-msg" class="saved-msg"></span>
+      </div>
+    </form>
+
+    <!-- À propos / crédits -->
+    <footer class="about">
+      <div class="about-head">
+        <img src="../icons/icon-96.png" alt="" class="about-logo" />
+        <div>
+          <div class="about-name">FlagScout <span class="about-ver">v<span id="about-version">—</span></span></div>
+          <div class="about-tagline" data-i18n="optAboutTagline"></div>
+        </div>
+      </div>
+
+      <div class="about-credits">
+        <div class="about-credits-title" data-i18n="optCreditsTitle"></div>
+        <p class="credits-list">
+          <a href="https://ipapi.is/" target="_blank" rel="noreferrer">IPAPI</a> ·
+          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> ·
+          <a href="https://flagcdn.com/" target="_blank" rel="noreferrer">FlagCDN</a> ·
+          <a href="https://www.virustotal.com/" target="_blank" rel="noreferrer">VirusTotal</a> ·
+          <a href="https://www.iana.org/" target="_blank" rel="noreferrer">IANA</a> ·
+          <a href="https://amazonaws.com/" target="_blank" rel="noreferrer">AWS</a> ·
+          <a href="https://cloudflare-dns.com/" target="_blank" rel="noreferrer">Cloudflare</a> ·
+          <a href="https://nslookup.io/" target="_blank" rel="noreferrer">NSLookup</a>
+        </p>
+      </div>
+
+      <div class="about-foot">
+        <span data-i18n="optMadeBy"></span> · © <span id="about-year"></span> · <a href="mailto:flagscout@gnrs.ca" data-i18n="optContact"></a>
+      </div>
+    </footer>
+  </main>
+
+  <script src="../vendor/browser-polyfill.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
